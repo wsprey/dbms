@@ -1,0 +1,56 @@
+-- Creating the Old Roll Call Table (O_RollCall)
+CREATE TABLE O_RollCall (
+    RollNo INT PRIMARY KEY,
+    Name VARCHAR(50),
+    DateOfAttendance DATE
+);
+
+-- Creating the New Roll Call Table (N_RollCall)
+CREATE TABLE N_RollCall (
+    RollNo INT,
+    Name VARCHAR(50),
+    DateOfAttendance DATE
+);
+
+
+DECLARE
+    -- Parameterized Cursor to fetch records from N_RollCall
+    CURSOR cur_new_rollcall (v_rollno N_RollCall.RollNo%TYPE) IS
+        SELECT RollNo, Name, DateOfAttendance
+        FROM N_RollCall
+        WHERE RollNo = v_rollno;
+
+    -- Variable to hold existing record count
+    v_count INT;
+
+BEGIN
+    -- Loop through all records in N_RollCall
+    FOR rec IN (SELECT RollNo, Name, DateOfAttendance FROM N_RollCall) LOOP
+
+        -- Check if the record already exists in O_RollCall
+        SELECT COUNT(*)
+        INTO v_count
+        FROM O_RollCall
+        WHERE RollNo = rec.RollNo
+        AND DateOfAttendance = rec.DateOfAttendance;
+
+        -- If the record does not exist, insert it into O_RollCall
+        IF v_count = 0 THEN
+            INSERT INTO O_RollCall (RollNo, Name, DateOfAttendance)
+            VALUES (rec.RollNo, rec.Name, rec.DateOfAttendance);
+            DBMS_OUTPUT.PUT_LINE('Inserted RollNo: ' || rec.RollNo || ' into O_RollCall.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Skipped RollNo: ' || rec.RollNo || ' (Already exists in O_RollCall).');
+        END IF;
+    END LOOP;
+
+    -- Commit the transaction to save changes
+    COMMIT;
+
+EXCEPTION
+    -- Handle any unexpected exceptions
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+        ROLLBACK;  -- Rollback in case of error
+END;
+/

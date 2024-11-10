@@ -1,0 +1,49 @@
+// 1. Create Database or Switch to It
+use schoolDatabase  // Replace "schoolDatabase" with your desired database name
+
+// 2. Insert Documents into the "Teachers" Collection
+db.Teachers.insertMany([
+    { Tname: "John Doe", dno: 101, Experience: 12, Salary: 60000, Date_of_Joining: new Date("2010-06-15") },
+    { Tname: "Jane Smith", dno: 102, Experience: 5, Salary: 45000, Date_of_Joining: new Date("2018-08-10") },
+    { Tname: "Alice Johnson", dno: 101, Experience: 8, Salary: 52000, Date_of_Joining: new Date("2015-03-22") },
+    { Tname: "Bob Williams", dno: 103, Experience: 15, Salary: 75000, Date_of_Joining: new Date("2007-09-01") }
+])
+
+// 3. Insert Documents into the "Department" Collection
+db.Department.insertMany([
+    { Dno: 101, Dname: "Mathematics" },
+    { Dno: 102, Dname: "Physics" },
+    { Dno: 103, Dname: "Chemistry" }
+])
+
+// 4. Insert Documents into the "Students" Collection
+db.Students.insertMany([
+    { Sname: "Michael Brown", Roll_No: 1, Class: "Class 10" },
+    { Sname: "Emily Davis", Roll_No: 2, Class: "Class 10" },
+    { Sname: "Chris Wilson", Roll_No: 3, Class: "Class 9" },
+    { Sname: "Sarah Lee", Roll_No: 4, Class: "Class 10" }
+])
+
+// 5. Query: Find information about all teachers of dno=102 and having salary greater than or equal to 10,000
+db.Teachers.find(
+    { dno: 102, Salary: { $gte: 10000 } }
+)
+
+// 6. Query: Find student information having Roll_No=2 or Sname='xyz'
+db.Students.find(
+    { $or: [ { Roll_No: 2 }, { Sname: 'xyz' } ] }
+)
+
+// 7. Query: Update the student name whose Roll_No=5
+db.Students.updateOne(
+    { Roll_No: 5 },    // Update where Roll_No is 5
+    { $set: { Sname: 'New Student Name' } }  // Set the new name
+)
+
+// 8. Query: Delete all students whose Class is 'FE'
+db.Students.deleteMany(
+    { Class: 'FE' }
+)
+
+// 9. Create an Index on the Students Collection (e.g., on Sname for faster searching by name)
+db.Students.createIndex({ Sname: 1 })

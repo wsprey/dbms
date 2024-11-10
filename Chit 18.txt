@@ -1,0 +1,78 @@
+// 1. Create the database named "cityDatabase"
+use cityDatabase;
+
+// 2. Create the collection "city" (this is done automatically when you insert the first document)
+
+// 3. Insert a document into the "city" collection
+db.city.insertMany([
+    { city: "pune", type: "urban", state: "MH", population: "5600000" },
+    { city: "mumbai", type: "urban", state: "MH", population: "12442373" },
+    { city: "nagpur", type: "urban", state: "MH", population: "2405665" },
+    { city: "aurangabad", type: "urban", state: "MH", population: "1174570" },
+    { city: "jalna", type: "rural", state: "MH", population: "532440" },
+    { city: "pimpri chinchwad", type: "urban", state: "MH", population: "1739680" },
+    { city: "nashik", type: "urban", state: "MH", population: "1876595" },
+    { city: "solapur", type: "urban", state: "MH", population: "1010333" },
+    { city: "thane", type: "urban", state: "MH", population: "1811692" },
+    { city: "kolhapur", type: "urban", state: "MH", population: "555000" }
+]);
+
+// 4. Display all documents in the "city" collection
+db.city.find().pretty();
+
+// MapReduce for State-wise Population
+var stateMap = function() {
+    emit(this.state, parseInt(this.population)); // Convert population to integer
+};
+
+var stateReduce = function(key, values) {
+    return Array.sum(values); // Sum the populations
+};
+
+db.city.mapReduce(
+    stateMap,
+    stateReduce,
+    { out: "statewise_population" }
+);
+
+// Display state-wise population
+print("State-wise Population:");
+db.statewise_population.find().pretty();
+
+// MapReduce for City-wise Population
+var cityMap = function() {
+    emit(this.city, parseInt(this.population)); // Convert population to integer
+};
+
+var cityReduce = function(key, values) {
+    return Array.sum(values); // Sum the populations
+};
+
+db.city.mapReduce(
+    cityMap,
+    cityReduce,
+    { out: "citywise_population" }
+);
+
+// Display city-wise population
+print("City-wise Population:");
+db.citywise_population.find().pretty();
+
+// MapReduce for Type-wise Population
+var typeMap = function() {
+    emit(this.type, parseInt(this.population)); // Convert population to integer
+};
+
+var typeReduce = function(key, values) {
+    return Array.sum(values); // Sum the populations
+};
+
+db.city.mapReduce(
+    typeMap,
+    typeReduce,
+    { out: "typewise_population" }
+);
+
+// Display type-wise population
+print("Type-wise Population:");
+db.typewise_population.find().pretty();

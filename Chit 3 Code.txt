@@ -1,0 +1,60 @@
+-- Create the Stud table to store student data
+CREATE TABLE Stud (
+    Roll NUMBER PRIMARY KEY,    -- Roll number of the student (unique)
+    Att NUMBER(3, 2),           -- Attendance percentage (e.g., 72.5%)
+    Status CHAR(2)              -- Status ('D' for Denied, 'ND' for Not Denied)
+);
+
+-- Insert sample data into the Stud table
+INSERT INTO Stud (Roll, Att, Status) VALUES (101, 80.00, NULL);  -- 80% attendance
+INSERT INTO Stud (Roll, Att, Status) VALUES (102, 70.00, NULL);  -- 70% attendance
+INSERT INTO Stud (Roll, Att, Status) VALUES (103, 75.00, NULL);  -- 75% attendance
+COMMIT;
+
+DECLARE
+    -- Declare variables
+    v_roll   Stud.Roll%TYPE;    -- Student's roll number
+    v_att    Stud.Att%TYPE;     -- Student's attendance
+    v_status Stud.Status%TYPE;  -- Status to be updated ('D' for Denied, 'ND' for Not Denied)
+
+BEGIN
+    -- Accept roll number from the user
+    v_roll := &roll_no;  -- Use substitution variable to take input from user (e.g., in SQL*Plus or SQL Developer)
+
+    -- Fetch the student's attendance based on roll number
+    SELECT Att INTO v_att
+    FROM Stud
+    WHERE Roll = v_roll;
+
+    -- Check if attendance is less than 75%
+    IF v_att < 75 THEN
+        -- Attendance is less than 75%, term is not granted
+        v_status := 'D';
+        DBMS_OUTPUT.PUT_LINE('Term not granted');
+
+        -- Update the student's status to 'D' in the Stud table
+        UPDATE Stud
+        SET Status = v_status
+        WHERE Roll = v_roll;
+
+    ELSE
+        -- Attendance is 75% or higher, term is granted
+        v_status := 'ND';
+        DBMS_OUTPUT.PUT_LINE('Term granted');
+
+        -- Update the student's status to 'ND' in the Stud table
+        UPDATE Stud
+        SET Status = v_status
+        WHERE Roll = v_roll;
+    END IF;
+
+EXCEPTION
+    -- Handle the case where no data is found for the roll number
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No student found with Roll number: ' || v_roll);
+
+    -- Handle any other exceptions
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/

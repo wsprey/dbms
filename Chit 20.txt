@@ -1,0 +1,79 @@
+// Step 1: Create the database (if not already created) and switch to it
+use InstituteDatabase;  // Replace with your desired database name
+
+// Step 2: Create Collection
+db.createCollection("Student");
+
+// Step 3: Insert some documents
+db.Student.insertMany([
+    { Rollno: 1, name: 'Navin', subject: 'DMSA', marks: 78 },
+    { Rollno: 2, name: 'Anusha', subject: 'OSD', marks: 75 },
+    { Rollno: 3, name: 'Ravi', subject: 'TOC', marks: 69 },
+    { Rollno: 4, name: 'Veena', subject: 'TOC', marks: 70 },
+    { Rollno: 5, name: 'Pravini', subject: 'OSD', marks: 80 },
+    { Rollno: 6, name: 'Reena', subject: 'DMSA', marks: 50 },
+    { Rollno: 7, name: 'Geeta', subject: 'CN', marks: 90 },
+    { Rollno: 8, name: 'Akash', subject: 'CN', marks: 85 }
+]);
+
+// Step 4: Create a single index on the 'name' field
+db.Student.createIndex({ name: 1 });
+
+// Step 5: Create a compound index on 'subject' and 'marks' fields
+db.Student.createIndex({ subject: 1, marks: 1 });
+
+// Step 6: Create a unique index on 'Rollno' field
+db.Student.createIndex({ Rollno: 1 }, { unique: true });
+
+// Step 7: Show index information
+db.Student.getIndexes();
+
+// Step 8: Remove indexes
+db.Student.dropIndex("name_1"); // Drop single index on name
+db.Student.dropIndex("subject_1_marks_1"); // Drop compound index on subject and marks
+db.Student.dropIndex("Rollno_1"); // Drop unique index on Rollno
+
+// Step 9: Aggregation Queries
+
+// 1. Write aggregate function to find Max marks of Each Subject.
+db.Student.aggregate([
+    { $group: { _id: "$subject", MaxMarks: { $max: "$marks" } } }
+]);
+
+// 2. Write aggregate function to find Min marks of Each Subject.
+db.Student.aggregate([
+    { $group: { _id: "$subject", MinMarks: { $min: "$marks" } } }
+]);
+
+// 3. Write aggregate function to find Sum of marks of Each Subject.
+db.Student.aggregate([
+    { $group: { _id: "$subject", TotalMarks: { $sum: "$marks" } } }
+]);
+
+// 4. Write aggregate function to find Avg marks of Each Subject.
+db.Student.aggregate([
+    { $group: { _id: "$subject", AvgMarks: { $avg: "$marks" } } }
+]);
+
+// 5. Write aggregate function to find first record of Each Subject.
+db.Student.aggregate([
+    { $sort: { Rollno: 1 } },  // Sorting to ensure correct first record
+    { $group: { _id: "$subject", FirstRecord: { $first: "$$ROOT" } } }
+]);
+
+// 6. Write aggregate function to find Last record of Each Subject.
+db.Student.aggregate([
+    { $sort: { Rollno: 1 } },  // Sorting to ensure correct last record
+    { $group: { _id: "$subject", LastRecord: { $last: "$$ROOT" } } }
+]);
+
+// 7. Write aggregate function to find count number of records of each subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", Count: { $sum: 1 } } }
+]);
+
+// 8. Write aggregate function to find count number of records of each subject (same as above)
+db.Student.aggregate([
+    { $group: { _id: "$subject", Count: { $sum: 1 } } }
+]);
+

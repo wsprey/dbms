@@ -1,0 +1,62 @@
+-- Step 1: Create the Library Table
+CREATE TABLE Library (
+    BookID INT PRIMARY KEY,
+    Title VARCHAR(255),
+    Author VARCHAR(255),
+    PublishedDate DATE,
+    Status VARCHAR(50) -- e.g., 'Available', 'Checked Out'
+);
+
+-- Step 2: Create the Library_Audit Table
+CREATE TABLE Library_Audit (
+    AuditID INT AUTO_INCREMENT PRIMARY KEY,
+    BookID INT,
+    Title VARCHAR(255),
+    Author VARCHAR(255),
+    PublishedDate DATE,
+    Status VARCHAR(50),
+    Operation VARCHAR(10), -- 'UPDATE' or 'DELETE'
+    OperationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Step 3: Create Trigger for Update Operation
+DELIMITER //
+
+CREATE TRIGGER before_library_update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (BookID, Title, Author, PublishedDate, Status, Operation)
+    VALUES (OLD.BookID, OLD.Title, OLD.Author, OLD.PublishedDate, OLD.Status, 'UPDATE');
+END;
+//
+
+-- Step 4: Create Trigger for Delete Operation
+CREATE TRIGGER before_library_delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (BookID, Title, Author, PublishedDate, Status, Operation)
+    VALUES (OLD.BookID, OLD.Title, OLD.Author, OLD.PublishedDate, OLD.Status, 'DELETE');
+END;
+//
+
+DELIMITER ;
+
+-- Sample Data Insertion for Testing
+INSERT INTO Library (BookID, Title, Author, PublishedDate, Status)
+VALUES 
+(1, 'The Great Gatsby', 'F. Scott Fitzgerald', '1925-04-10', 'Available'),
+(2, 'To Kill a Mockingbird', 'Harper Lee', '1960-07-11', 'Available');
+
+-- Test Update Operation
+UPDATE Library
+SET Status = 'Checked Out'
+WHERE BookID = 1;
+
+-- Test Delete Operation
+DELETE FROM Library
+WHERE BookID = 2;
+
+-- Check the Audit Log
+SELECT * FROM Library_Audit;

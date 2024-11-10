@@ -1,0 +1,62 @@
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
+import static com.mongodb.client.model.Filters.eq;
+
+public class InstituteDatabase {
+
+    public static void main(String[] args) {
+        // Step 1: Connect to MongoDB
+        MongoClientURI uri = new MongoClientURI("mongodb://localhost:27017"); // Update with your MongoDB URI if necessary
+        MongoClient mongoClient = new MongoClient(uri);
+
+        // Step 2: Create or Access a Database
+        MongoDatabase database = mongoClient.getDatabase("Institute"); // Create database if it does not exist
+
+        // Step 3: Create a Collection
+        MongoCollection<Document> studentCollection = database.getCollection("students");
+        // Create collection (This will not throw an error if it already exists)
+        database.createCollection("students");
+
+        // Step 4: Insert a Document
+        Document student1 = new Document("name", "John Doe")
+                .append("age", 21)
+                .append("major", "Computer Science")
+                .append("status", "active");
+        studentCollection.insertOne(student1);
+        System.out.println("Inserted Document: " + student1.toJson());
+
+        Document student2 = new Document("name", "Jane Smith")
+                .append("age", 22)
+                .append("major", "Mathematics")
+                .append("status", "active");
+        studentCollection.insertOne(student2);
+        System.out.println("Inserted Document: " + student2.toJson());
+
+        // Step 5: Display Data
+        System.out.println("Students in the Institute:");
+        for (Document doc : studentCollection.find()) {
+            System.out.println(doc.toJson());
+        }
+
+        // Step 6: Remove a Document
+        studentCollection.deleteOne(eq("name", "Jane Smith"));
+        System.out.println("Removed Document: Jane Smith");
+
+        // Step 7: Update a Document
+        studentCollection.updateOne(eq("name", "John Doe"), new Document("$set", new Document("status", "graduated")));
+        System.out.println("Updated student status for John Doe");
+
+        // Display remaining students after remove and update
+        System.out.println("Remaining Students:");
+        for (Document doc : studentCollection.find()) {
+            System.out.println(doc.toJson());
+        }
+
+        // Close the MongoDB connection
+        mongoClient.close();
+    }
+}

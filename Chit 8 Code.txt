@@ -1,0 +1,80 @@
+CREATE TABLE teaches (
+    T_ID INT,
+    course_id INT,
+    sec_id INT,
+    semester VARCHAR(10),
+    year INT,
+    PRIMARY KEY (T_ID, course_id, sec_id, semester, year)
+);
+
+CREATE TABLE student (
+    S_ID INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_name VARCHAR(50),
+    tot_cred INT
+);
+
+CREATE TABLE instructor (
+    T_ID INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_name VARCHAR(50),
+    salary DECIMAL(10, 2)
+);
+
+CREATE TABLE course (
+    course_id INT PRIMARY KEY,
+    title VARCHAR(100),
+    dept_name VARCHAR(50),
+    credits INT
+);
+
+-- Inserting sample data into teaches
+INSERT INTO teaches (T_ID, course_id, sec_id, semester, year) VALUES 
+(1, 101, 1, 'Fall', 2023),
+(2, 102, 1, 'Spring', 2024),
+(1, 103, 2, 'Fall', 2023),
+(3, 104, 1, 'Spring', 2024);
+
+-- Inserting sample data into student
+INSERT INTO student (S_ID, name, dept_name, tot_cred) VALUES 
+(1, 'Alice', 'Computer Science', 120),
+(2, 'Bob', 'Mathematics', 90),
+(3, 'Charlie', 'Physics', 75);
+
+-- Inserting sample data into instructor
+INSERT INTO instructor (T_ID, name, dept_name, salary) VALUES 
+(1, 'Dr. Smith', 'Computer Science', 80000),
+(2, 'Dr. Johnson', 'Mathematics', 75000),
+(3, 'Dr. Lee', 'Physics', 70000);
+
+-- Inserting sample data into course
+INSERT INTO course (course_id, title, dept_name, credits) VALUES 
+(101, 'Data Structures', 'Computer Science', 4),
+(102, 'Calculus I', 'Mathematics', 3),
+(103, 'Physics I', 'Physics', 4),
+(104, 'Algorithms', 'Computer Science', 4);
+
+
+-- 1. Find names of instructors who taught courses semester-wise
+SELECT i.name AS instructor_name, t.semester, c.title AS course_title
+FROM instructor i
+JOIN teaches t ON i.T_ID = t.T_ID
+JOIN course c ON t.course_id = c.course_id
+ORDER BY t.semester;
+
+-- 2. Create a view to retrieve student details
+CREATE VIEW student_details AS
+SELECT S_ID, name, dept_name, tot_cred
+FROM student;
+
+-- 3. Rename the column from dept_name to department_name
+ALTER TABLE student
+CHANGE dept_name department_name VARCHAR(50);
+
+-- 4. Delete students whose department is NULL
+DELETE FROM student
+WHERE department_name IS NULL;
+
+-- Optional: Check the created view for student details
+SELECT * FROM student_details;
+

@@ -1,0 +1,91 @@
+-- Step 1: Create the Database (if not already created)
+CREATE DATABASE IF NOT EXISTS CompanyDB;
+USE CompanyDB;
+
+-- Step 2: Create Tables
+
+-- Employee Table
+CREATE TABLE IF NOT EXISTS Emp (
+    emp_id INT PRIMARY KEY,
+    ename VARCHAR(100) NOT NULL,
+    street VARCHAR(100),
+    city VARCHAR(100)
+);
+
+-- Works Table
+CREATE TABLE IF NOT EXISTS works (
+    emp_id INT,
+    c_id INT,
+    ename VARCHAR(100),
+    cname VARCHAR(100),
+    sal DECIMAL(10, 2),
+    FOREIGN KEY (emp_id) REFERENCES Emp(emp_id)
+);
+
+-- Company Table
+CREATE TABLE IF NOT EXISTS Company (
+    c_id INT PRIMARY KEY,
+    cname VARCHAR(100) NOT NULL,
+    city VARCHAR(100)
+);
+
+-- Manager Table
+CREATE TABLE IF NOT EXISTS Manager (
+    mgr_id INT PRIMARY KEY,
+    mgrname VARCHAR(100) NOT NULL,
+    salary DECIMAL(10, 2)  -- Added salary field for managers
+);
+
+-- Step 3: Insert Sample Data into Tables
+
+-- Inserting data into Emp table
+INSERT INTO Emp (emp_id, ename, street, city) VALUES
+(1, 'John Doe', '123 Main St', 'Pune'),
+(2, 'Jane Smith', '456 Elm St', 'Los Angeles'),
+(3, 'Jim Brown', '789 Pine St', 'Mumbai');
+
+-- Inserting data into Company table
+INSERT INTO Company (c_id, cname, city) VALUES
+(1, 'TechCorp', 'Pune'),
+(2, 'Bosch', 'Pune'),  -- Company in Pune
+(3, 'DataSystems', 'Mumbai');
+
+-- Inserting data into works table
+INSERT INTO works (emp_id, c_id, ename, cname, sal) VALUES
+(1, 1, 'John Doe', 'TechCorp', 60000.00),
+(2, 2, 'Jane Smith', 'Bosch', 65000.00),  -- Works for Bosch
+(3, 3, 'Jim Brown', 'DataSystems', 58000.00);
+
+-- Inserting data into Manager table
+INSERT INTO Manager (mgr_id, mgrname, salary) VALUES
+(1, 'Sarah Johnson', 25000.00),  -- Salary > 20,000
+(2, 'Mike Lee', 18000.00);         -- Salary < 20,000
+
+-- Step 4: Query Answers
+
+-- i. Modify the database so that a particular company (e.g., Bosch) is now in Pune
+UPDATE Company SET city = 'Pune' WHERE cname = 'Bosch';
+
+-- ii. Give all managers of Mbank a 10% raise. If salary is >20,000, give only 3% raise.
+UPDATE Manager 
+SET salary = CASE 
+                WHEN salary > 20000 THEN salary * 1.03 
+                ELSE salary * 1.10 
+             END
+WHERE mgrname LIKE '%Mbank%';  -- Assuming Mbank is part of the manager's name
+
+-- iii. Find out the names of all the employees who work in ‘Bosch’ company in the city Pune
+SELECT ename 
+FROM works w
+JOIN Company c ON w.c_id = c.c_id
+WHERE c.cname = 'Bosch' AND c.city = 'Pune';
+
+-- iv. Delete all records in the works table for employees of a particular company (e.g., SBC Company) whose salary > 50,000.
+DELETE FROM works 
+WHERE cname = 'SBC Company' AND sal > 50000;
+
+-- Cleanup: Drop tables if necessary (optional)
+-- DROP TABLE IF EXISTS works;
+-- DROP TABLE IF EXISTS Company;
+-- DROP TABLE IF EXISTS Emp;
+-- DROP TABLE IF EXISTS Manager;

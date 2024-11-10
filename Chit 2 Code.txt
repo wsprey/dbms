@@ -1,0 +1,98 @@
+-- Step 1: Create the Borrower Table
+BEGIN
+    EXECUTE IMMEDIATE 'CREATE TABLE Borrower (
+        Rollin INT PRIMARY KEY,
+        Name VARCHAR(50),
+        DateofIssue DATE,
+        NameofBook VARCHAR(100),
+        Status CHAR(1)  -- ''I'' for Issued, ''R'' for Returned
+    )';
+    DBMS_OUTPUT.PUT_LINE('Borrower table created successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE = -955 THEN  -- Table already exists
+            DBMS_OUTPUT.PUT_LINE('Borrower table already exists.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Error creating Borrower table: ' || SQLERRM);
+        END IF;
+END;
+/
+
+-- Step 2: Create the Fine Table
+BEGIN
+    EXECUTE IMMEDIATE 'CREATE TABLE Fine (
+        Roll_no INT,
+        Date DATE,
+        Amt NUMBER(10, 2),
+        CONSTRAINT fk_roll_no FOREIGN KEY (Roll_no) REFERENCES Borrower(Rollin)
+    )';
+    DBMS_OUTPUT.PUT_LINE('Fine table created successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE = -955 THEN  -- Table already exists
+            DBMS_OUTPUT.PUT_LINE('Fine table already exists.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Error creating Fine table: ' || SQLERRM);
+        END IF;
+END;
+/
+
+-- Step 3: PL/SQL Block for Fine Calculation and Status Update
+DECLARE
+    -- Declare variables
+    v_roll_no   Borrower.Rollin%TYPE;
+    v_book_name Borrower.NameofBook%TYPE;
+    v_issue_date Borrower.DateofIssue%TYPE;
+    v_status    Borrower.Status%TYPE;
+    v_due_days  INTEGER;
+    v_fine_amt  NUMBER(10, 2) := 0;
+
+BEGIN
+    -- Accept roll number and book name from user
+    v_roll_no := &roll_no;  -- Replace with proper input mechanism if used in real code
+    v_book_name := '&book_name';  -- Same as above, or could be input through application
+
+    -- Retrieve Borrower Information based on the roll number and book name
+    SELECT DateofIssue, Status
+    INTO v_issue_date, v_status
+    FROM Borrower
+    WHERE Rollin = v_roll_no AND NameofBook = v_book_name;
+
+    -- Calculate the number of days since the book was issued
+    v_due_days := TRUNC(SYSDATE - v_issue_date);
+
+    -- Check if the book has already been returned (status 'R' means returned)
+    IF v_status = 'R' THEN
+        DBMS_OUTPUT.PUT_LINE('The book has already been returned.');
+    ELSE
+        -- Fine Calculation
+        IF v_due_days > 15 AND v_due_days <= 30 THEN
+            v_fine_amt := (v_due_days - 15) * 5;  -- Rs. 5 per day for overdue between 15 and 30 days
+        ELSIF v_due_days > 30 THEN
+            v_fine_amt := (v_due_days - 30) * 50 + 15 * 5;  -- Rs. 50 per day after 30 days and Rs. 5 per day for first 15-30 days
+        END IF;
+
+        -- Update the status of the book to 'R' (Returned)
+        UPDATE Borrower
+        SET Status = 'R'
+        WHERE Rollin = v_roll_no AND NameofBook = v_book_name;
+
+        -- If a fine was calculated, insert fine details into the Fine table
+        IF v_fine_amt > 0 THEN
+            INSERT INTO Fine (Roll_no, Date, Amt)
+            VALUES (v_roll_no, SYSDATE, v_fine_amt);
+            DBMS_OUTPUT.PUT_LINE('Fine imposed: ' || v_fine_amt || ' Rs.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('No fine imposed. Book returned within the allowed period.');
+        END IF;
+    END IF;
+
+EXCEPTION
+    -- Handle exceptions if borrower details are not found or other errors
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No borrower found with Roll number ' || v_roll_no || ' and book ' || v_book_name);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+
+END;
+/

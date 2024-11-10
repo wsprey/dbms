@@ -1,0 +1,102 @@
+-- Step 1: Create the Department Table
+CREATE TABLE Department (
+    Dept_ID INT PRIMARY KEY,
+    Dept_Name VARCHAR(50)
+);
+
+-- Step 2: Create the Instructor Table
+CREATE TABLE Instructor (
+    Instr_ID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Salary NUMBER(10, 2),
+    Dept_ID INT,
+    FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
+);
+
+-- Step 3: Create the Student Table
+CREATE TABLE Student (
+    Stud_ID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Dept_ID INT,
+    FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
+);
+
+-- Step 4: Create the Courses Table
+CREATE TABLE Courses (
+    Course_ID INT PRIMARY KEY,
+    Course_Name VARCHAR(50),
+    Dept_ID INT,
+    FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
+);
+
+-- Step 5: Create the Takes Table (Tracks what students take)
+CREATE TABLE Takes (
+    Stud_ID INT,
+    Course_ID INT,
+    FOREIGN KEY (Stud_ID) REFERENCES Student(Stud_ID),
+    FOREIGN KEY (Course_ID) REFERENCES Courses(Course_ID)
+);
+
+-- Step 6: Insert Sample Data into Department Table
+INSERT INTO Department VALUES (1, 'Computer');
+INSERT INTO Department VALUES (2, 'Mathematics');
+INSERT INTO Department VALUES (3, 'Physics');
+
+-- Step 7: Insert Sample Data into Instructor Table
+INSERT INTO Instructor VALUES (101, 'Amol', 45000, 1);
+INSERT INTO Instructor VALUES (102, 'Amit', 40000, 1);
+INSERT INTO Instructor VALUES (103, 'Raj', 43000, 2);
+INSERT INTO Instructor VALUES (104, 'Nisha', 39000, 2);
+INSERT INTO Instructor VALUES (105, 'Sara', 47000, 3);
+
+-- Step 8: Insert Sample Data into Student Table
+INSERT INTO Student VALUES (201, 'Aman', 1);
+INSERT INTO Student VALUES (202, 'Sam', 1);
+INSERT INTO Student VALUES (203, 'Amit', 2);
+INSERT INTO Student VALUES (204, 'Ram', 2);
+INSERT INTO Student VALUES (205, 'Rahul', 3);
+
+-- Step 9: Insert Sample Data into Courses Table
+INSERT INTO Courses VALUES (301, 'DBMS', 1);
+INSERT INTO Courses VALUES (302, 'Algorithms', 1);
+INSERT INTO Courses VALUES (303, 'Calculus', 2);
+INSERT INTO Courses VALUES (304, 'Quantum Physics', 3);
+
+-- Step 10: Insert Sample Data into Takes Table
+INSERT INTO Takes VALUES (201, 301); -- Aman takes DBMS
+INSERT INTO Takes VALUES (202, 301); -- Sam takes DBMS
+INSERT INTO Takes VALUES (202, 302); -- Sam takes Algorithms
+INSERT INTO Takes VALUES (203, 303); -- Amit takes Calculus
+INSERT INTO Takes VALUES (205, 304); -- Rahul takes Quantum Physics
+
+-- Step 11: Queries for the Given Tasks
+
+-- i. Find the average salary of instructors in those departments where the average salary is more than Rs. 42000.
+SELECT Dept_Name, AVG(Salary) AS Avg_Salary
+FROM Instructor I
+JOIN Department D ON I.Dept_ID = D.Dept_ID
+GROUP BY Dept_Name
+HAVING AVG(Salary) > 42000;
+
+-- ii. Increase the salary of each instructor in the computer department by 10%.
+UPDATE Instructor
+SET Salary = Salary * 1.10
+WHERE Dept_ID = (SELECT Dept_ID FROM Department WHERE Dept_Name = 'Computer');
+
+-- iii. Find the names of instructors whose names are neither ‘Amol’ nor ‘Amit’.
+SELECT Name 
+FROM Instructor 
+WHERE Name NOT IN ('Amol', 'Amit');
+
+-- iv. Find the names of students whose names contain ‘am’ as a substring.
+SELECT Name
+FROM Student
+WHERE LOWER(Name) LIKE '%am%';
+
+-- v. Find the names of students from the computer department who take the “DBMS” course.
+SELECT S.Name
+FROM Student S
+JOIN Takes T ON S.Stud_ID = T.Stud_ID
+JOIN Courses C ON T.Course_ID = C.Course_ID
+WHERE S.Dept_ID = (SELECT Dept_ID FROM Department WHERE Dept_Name = 'Computer')
+AND C.Course_Name = 'DBMS';

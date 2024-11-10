@@ -1,0 +1,34 @@
+-- Create the sequence starting at 101
+CREATE SEQUENCE emp_sequence
+    START WITH 101
+    INCREMENT BY 1;
+
+-- Create the emp table with the specified constraints
+CREATE TABLE emp (
+    Eno INT PRIMARY KEY DEFAULT emp_sequence.NEXTVAL, -- Primary key with sequence
+    Ename VARCHAR(50) NOT NULL,                        -- Not null constraint
+    Address VARCHAR(100) DEFAULT 'Nashik',            -- Default value constraint
+    Joindate DATE,                                     -- Joining date
+    Salary DECIMAL(10, 2)                             -- Salary field
+);
+
+-- Alter the table to add the Post field
+ALTER TABLE emp ADD Post VARCHAR(50);
+
+-- Insert some sample data into the emp table
+INSERT INTO emp (Ename, Address, Joindate, Salary, Post) VALUES ('Amit', 'Mumbai', TO_DATE('2023-01-15', 'YYYY-MM-DD'), 50000.00, 'Manager');
+INSERT INTO emp (Ename, Address, Joindate, Salary, Post) VALUES ('Sneha', 'Pune', TO_DATE('2023-02-10', 'YYYY-MM-DD'), 45000.00, 'Developer');
+INSERT INTO emp (Ename, Address, Joindate, Salary, Post) VALUES ('Savita', 'Nashik', TO_DATE('2023-03-05', 'YYYY-MM-DD'), 30000.00, 'Tester');
+INSERT INTO emp (Ename, Address, Joindate, Salary, Post) VALUES ('Pooja', 'Mumbai', TO_DATE('2023-04-20', 'YYYY-MM-DD'), 40000.00, 'Designer');
+INSERT INTO emp (Ename, Address, Joindate, Salary, Post) VALUES ('Sagar', 'Nagpur', TO_DATE('2023-05-10', 'YYYY-MM-DD'), 25000.00, 'Intern');
+
+-- Create an index on the Ename field
+CREATE INDEX idx_emp_name ON emp(Ename);
+
+-- Create a view to show only Ename and Salary
+CREATE VIEW emp_view AS
+SELECT Ename, Salary
+FROM emp;
+
+-- Optional: Select from the view to verify
+SELECT * FROM emp_view;

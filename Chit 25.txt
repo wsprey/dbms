@@ -1,0 +1,78 @@
+-- Step 1: Create the Database
+CREATE DATABASE IF NOT EXISTS CompanyDB;
+USE CompanyDB;
+
+-- Step 2: Create the Empl table
+CREATE TABLE IF NOT EXISTS Empl (
+    e_no INT PRIMARY KEY,
+    e_name VARCHAR(100) NOT NULL,
+    post VARCHAR(50),
+    pay_rate DECIMAL(10, 2)
+);
+
+-- Step 3: Create the Position table
+CREATE TABLE IF NOT EXISTS Position (
+    pos_no INT PRIMARY KEY,
+    post VARCHAR(50) NOT NULL
+);
+
+-- Step 4: Create the Duty_alloc table
+CREATE TABLE IF NOT EXISTS Duty_alloc (
+    pos_no INT,
+    e_no INT,
+    month INT,
+    year INT,
+    shift VARCHAR(10),
+    FOREIGN KEY (pos_no) REFERENCES Position(pos_no),
+    FOREIGN KEY (e_no) REFERENCES Empl(e_no),
+    PRIMARY KEY (pos_no, e_no, month, year)
+);
+
+-- Step 5: Insert sample data into the Empl table
+INSERT INTO Empl (e_no, e_name, post, pay_rate) VALUES 
+(123, 'John Doe', 'Manager', 75000),
+(124, 'Jane Smith', 'Developer', 60000),
+(125, 'Sachin', 'Tester', 50000),
+(126, 'Alice Johnson', 'Manager', 70000),
+(127, 'Bob Brown', 'Designer', 55000);
+
+-- Step 6: Insert sample data into the Position table
+INSERT INTO Position (pos_no, post) VALUES
+(1, 'Manager'),
+(2, 'Developer'),
+(3, 'Tester'),
+(4, 'Designer');
+
+-- Step 7: Insert sample data into the Duty_alloc table
+INSERT INTO Duty_alloc (pos_no, e_no, month, year, shift) VALUES
+(1, 123, 4, 2003, 'First'),
+(1, 126, 4, 2003, 'Second'),
+(2, 124, 4, 2003, 'First'),
+(3, 125, 4, 2003, 'First');
+
+-- Query i: Get duty allocation details for e_no 123 for the first shift in April 2003
+SELECT * FROM Duty_alloc 
+WHERE e_no = 123 AND shift = 'First' AND month = 4 AND year = 2003;
+
+-- Query ii: Get employees whose rate of pay is >= rate of pay of employees 'Sachin'.
+SELECT * FROM Empl 
+WHERE pay_rate >= (SELECT pay_rate FROM Empl WHERE e_name = 'Sachin');
+
+-- Query iii: Create a view for displaying minimum, maximum, and average salary for all posts.
+CREATE VIEW SalaryStats AS
+SELECT post, 
+       MIN(pay_rate) AS Minimum_Salary,
+       MAX(pay_rate) AS Maximum_Salary,
+       AVG(pay_rate) AS Average_Salary
+FROM Empl
+GROUP BY post;
+
+-- Query to display the created view
+SELECT * FROM SalaryStats;
+
+-- Query iv: Get count of different employees on each shift having post ‘manager’.
+SELECT d.shift, COUNT(e.e_no) AS Employee_Count 
+FROM Duty_alloc d
+JOIN Empl e ON d.e_no = e.e_no
+WHERE e.post = 'Manager'
+GROUP BY d.shift;

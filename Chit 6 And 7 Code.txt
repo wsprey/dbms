@@ -1,0 +1,54 @@
+-- Table to store student names and their total marks
+CREATE TABLE Stud_Marks (
+    Name VARCHAR(50),
+    Total_Marks NUMBER
+);
+
+-- Table to store the final result with Roll number, Name, and Class (Grade)
+CREATE TABLE Result (
+    Roll NUMBER PRIMARY KEY,
+    Name VARCHAR(50),
+    Class VARCHAR(30)
+);
+
+-- Inserting sample student marks data
+INSERT INTO Stud_Marks VALUES ('Alice', 1500);
+INSERT INTO Stud_Marks VALUES ('Bob', 980);
+INSERT INTO Stud_Marks VALUES ('Charlie', 900);
+INSERT INTO Stud_Marks VALUES ('David', 830);
+INSERT INTO Stud_Marks VALUES ('Eva', 750);
+CREATE OR REPLACE PROCEDURE proc_Grade IS
+    v_class VARCHAR(30);  -- Variable to store the grade category
+    v_roll NUMBER := 1;    -- Variable to generate roll numbers
+BEGIN
+    -- Loop through each student in Stud_Marks
+    FOR rec IN (SELECT Name, Total_Marks FROM Stud_Marks) LOOP
+
+        -- Categorize the student based on their marks
+        IF rec.Total_Marks >= 990 AND rec.Total_Marks <= 1500 THEN
+            v_class := 'Distinction';
+        ELSIF rec.Total_Marks BETWEEN 900 AND 989 THEN
+            v_class := 'First Class';
+        ELSIF rec.Total_Marks BETWEEN 825 AND 899 THEN
+            v_class := 'Higher Second Class';
+        ELSE
+            v_class := 'No Category';  -- Optional case for marks below 825
+        END IF;
+
+        -- Insert the result into the Result table
+        INSERT INTO Result (Roll, Name, Class)
+        VALUES (v_roll, rec.Name, v_class);
+
+        -- Increment the roll number for each student
+        v_roll := v_roll + 1;
+    END LOOP;
+    
+    -- Commit the changes to save the results
+    COMMIT;
+END;
+/
+BEGIN
+    -- Call the procedure to categorize students
+    proc_Grade;
+END;
+/

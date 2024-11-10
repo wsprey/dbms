@@ -1,0 +1,52 @@
+// 1. Create Database or Switch to It
+use department  // Create or switch to the "department" database
+
+// 2. Create the "teacher" Collection and Insert Documents
+db.teacher.insertMany([
+    { name: "Alice", department: "Computer Science", experience: 5, salary: 60000 },
+    { name: "Bob", department: "Mechanical Engineering", experience: 7, salary: 55000 },
+    { name: "Charlie", department: "Electrical Engineering", experience: 3, salary: 50000 },
+    { name: "David", department: "Computer Science", experience: 4, salary: 62000 },
+    { name: "Eve", department: "Mechanical Engineering", experience: 2, salary: 48000 },
+    { name: "Frank", department: "Civil Engineering", experience: 6, salary: 53000 },
+    { name: "Grace", department: "Computer Science", experience: 8, salary: 70000 },
+    { name: "Heidi", department: "Civil Engineering", experience: 1, salary: 45000 },
+    { name: "Ivan", department: "Electrical Engineering", experience: 5, salary: 52000 },
+    { name: "Judy", department: "Mechanical Engineering", experience: 9, salary: 58000 }
+]);
+
+// 3. Display the Department-wise Average Salary
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: "$department",
+            averageSalary: { $avg: "$salary" }
+        }
+    }
+]);
+
+// 4. Display the No. of Employees Working in Each Department
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: "$department",
+            employeeCount: { $sum: 1 }
+        }
+    }
+]);
+
+// 5. Display the Department-wise Minimum Salary
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: "$department",
+            minimumSalary: { $min: "$salary" }
+        }
+    }
+]);
+
+// 6. Apply Index on the "teacher" Collection
+db.teacher.createIndex({ department: 1 });
+
+// 7. Drop the Index
+db.teacher.dropIndex("department_1");

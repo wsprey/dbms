@@ -1,0 +1,156 @@
+// 1. Create Database or Switch to It
+use Institute  // Create or switch to the "Institute" database
+
+// 2. Create the "Students" Collection and Insert 10 Documents
+db.Students.insertMany([
+    {
+        RollNo: 1,
+        StudentName: "Alice Johnson",
+        Age: 20,
+        Branch: "Computer Science",
+        Address: {
+            City: "New York",
+            State: "NY"
+        },
+        Hobbies: ["Reading", "Swimming", "Cycling"]
+    },
+    {
+        RollNo: 2,
+        StudentName: "Bob Smith",
+        Age: 21,
+        Branch: "Mechanical Engineering",
+        Address: {
+            City: "Los Angeles",
+            State: "CA"
+        },
+        Hobbies: ["Football", "Traveling"]
+    },
+    {
+        RollNo: 3,
+        StudentName: "Charlie Brown",
+        Age: 22,
+        Branch: "Electrical Engineering",
+        Address: {
+            City: "Chicago",
+            State: "IL"
+        },
+        Hobbies: ["Video Games", "Music"]
+    },
+    {
+        RollNo: 4,
+        StudentName: "David Wilson",
+        Age: 19,
+        Branch: "Civil Engineering",
+        Address: {
+            City: "Houston",
+            State: "TX"
+        },
+        Hobbies: ["Photography", "Hiking"]
+    },
+    {
+        RollNo: 5,
+        StudentName: "Emma Davis",
+        Age: 18,
+        Branch: "Biotechnology",
+        Address: {
+            City: "Phoenix",
+            State: "AZ"
+        },
+        Hobbies: ["Drawing", "Cooking"]
+    },
+    {
+        RollNo: 6,
+        StudentName: "Frank Thomas",
+        Age: 17,
+        Branch: "Information Technology",
+        Address: {
+            City: "Philadelphia",
+            State: "PA"
+        },
+        Hobbies: ["Gaming", "Dancing"]
+    },
+    {
+        RollNo: 7,
+        StudentName: "Grace Lee",
+        Age: 16,
+        Branch: "Business Administration",
+        Address: {
+            City: "San Antonio",
+            State: "TX"
+        },
+        Hobbies: ["Writing", "Yoga"]
+    },
+    {
+        RollNo: 8,
+        StudentName: "Hannah Kim",
+        Age: 23,
+        Branch: "Psychology",
+        Address: {
+            City: "Dallas",
+            State: "TX"
+        },
+        Hobbies: ["Reading", "Traveling"]
+    },
+    {
+        RollNo: 9,
+        StudentName: "Isabella Martinez",
+        Age: 20,
+        Branch: "Economics",
+        Address: {
+            City: "San Diego",
+            State: "CA"
+        },
+        Hobbies: ["Baking", "Volunteering"]
+    },
+    {
+        RollNo: 10,
+        StudentName: "Jack Johnson",
+        Age: 24,
+        Branch: "Physics",
+        Address: {
+            City: "Pune",
+            State: "MH"
+        },
+        Hobbies: ["Swimming", "Hiking"]
+    }
+]);
+
+// 4. Display All Students' Information
+db.Students.find().pretty();
+
+// 5. Display Student Information Whose Age is Greater Than 15
+db.Students.find({ Age: { $gt: 15 } }).pretty();
+
+// 6. Display Student Information Sorted on Name Field
+db.Students.find().sort({ StudentName: 1 }).pretty();
+
+// 7. Update Student Branch Computer of RollNo 3
+db.Students.updateOne(
+    { RollNo: 3 },
+    { $set: { Branch: "Computer Engineering" } }
+);
+
+// 8. Remove Document with RollNo 1
+db.Students.deleteOne({ RollNo: 1 });
+
+// 9. Display Student Information Whose Name Starts with A
+db.Students.find({ StudentName: { $regex: /^A/, $options: 'i' } }).pretty();
+
+// 10. Display the Total Number of Documents Available in Collection
+const count = db.Students.countDocuments();
+print("Total number of documents:", count);
+
+// 11. Display Only First 5 Documents
+db.Students.find().limit(5).pretty();
+
+// 12. Display All Documents Instead of First 3
+db.Students.find().skip(3).pretty();
+
+// 13. Display the Name of Students Who Live in Pune City
+db.Students.find({ "Address.City": "Pune" }, { StudentName: 1, _id: 0 }).pretty();
+
+// 14. Display Only Name of All Students
+db.Students.find({}, { StudentName: 1, _id: 0 }).pretty();
+
+// 15. Drop Collection
+db.Students.drop();
